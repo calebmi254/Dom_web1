@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Vowel Voyage — Magical Sound Forest</title>
+
+
+
+<style>
+
+:root {
+    --bg-dark: hsl(120, 30%, 18%);
+    --bg-light: hsl(120, 30%, 30%);
+    --text-light: #fefefe;
+    --text-dark: #222;
+
+    --vowelA: #ffd6a5;
+    --vowelE: #bde0fe;
+    --vowelI: #caffbf;
+    --vowelO: #ffadad;
+    --vowelU: #9bf6ff;
+
+    --muted: #667085;
+}
+
+
+body {
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: var(--text-dark);
+    font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.app {
+    max-width: 1100px;
+    margin: 18px auto;
+    padding: 18px;
+    background: white;
+    border-radius: 12px;
+}
+
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo .bubble {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fff, #ffd);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 20px;
+    color: #2b2d42;
+    box-shadow: 0 6px 18px rgba(43, 45, 66, 0.12);
+}
+
+.intro {
+    font-size: 15px;
+    color: var(--muted);
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: white;
+    border: 2px solid rgba(0,0,0,0.05);
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(43,45,66,0.06);
+}
+.btn.small { padding: 6px 10px; font-size: 13px; }
+
+nav {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+
+.map {
+    margin-top: 18px;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 12px 30px rgba(43,45,66,0.08);
+    background: white;
+}
+
+.panel {
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(16,24,40,0.06);
+    background: white;
+    flex: 1;
+}
+
+
+.row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+
+.map-canvas {
+    height: 260px;
+    border-radius: 10px;
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.island {
+    position: absolute;
+    border-radius: 12px;
+    min-width: 84px;
+    min-height: 84px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .18s, box-shadow .18s;
+    color: #16324f;
+    font-size: 28px;
+}
+
+.island:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 30px rgba(14,30,37,0.12);
+}
+
+/* Fixed map positioning */
+.island[data-vowel="a"] { left: 8%;  top: 36%; background: var(--vowela); }
+.island[data-vowel="e"] { left: 28%; top: 12%; background: var(--vowele); }
+.island[data-vowel="i"] { left: 52%; top: 44%; background: var(--voweli); }
+.island[data-vowel="o"] { left: 74%; top: 20%; background: var(--vowelo); }
+.island[data-vowel="u"] { left: 84%; top: 56%; background: var(--vowelu); }
+
+
+.char-card {
+    width: 160px;
+    height: 160px;
+    border-radius: 12px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 28px rgba(18,26,46,0.06);
+}
+
+.big {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.status {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.progress {
+    height: 10px;
+    width: 160px;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.progress > i {
+    height: 100%;
+    display: block;
+    background: linear-gradient(90deg, #ffd447, #ffb86b);
+    width: 0%;
+}
+
+/* ---------------------------------
+      DRAG & DROP SPELLING
+---------------------------------- */
+.drag-area {
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px dashed rgba(15,30,45,0.08);
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.stone {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    cursor: grab;
+    background: white;
+    box-shadow: 0 8px 18px rgba(16,24,40,0.06);
+    user-select: none;
+}
+
+.dropzone {
+    min-height: 48px;
+    min-width: 220px;
+    padding: 10px;
+    border: 2px dashed #dbeafe;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ---------------------------------
+      FISH POND GAME (RESPONSIVE)
+---------------------------------- */
+.pond {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    padding: 10px;
+}
+
+.fish {
+    height: 70px;
+    border-radius: 12px;
+    border: 2px solid rgba(0,0,0,0.04);
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* ---------------------------------
+      QUIZ CARD
+---------------------------------- */
+.choice {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 2px solid rgba(16,24,40,0.06);
+    cursor: pointer;
+}
+
+.confetti {
+    position: fixed;
+    left: 0; 
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ---------------------------------
+      MOBILE OPTIMIZATION
+---------------------------------- */
+@media(max-width:520px){
+    .char-card { width: 120px; height: 120px; }
+    .stone { width: 48px; height: 48px; font-size: 16px; }
+    .dropzone { min-width: 100%; }
+    .island { min-width: 56px; min-height: 56px; }
+    h1 { font-size: 18px; }
+    .intro, .hint { font-size: 13px; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="app" role="application">
+<!-- HEADER -->
+<header>
+    <div class="logo">
+        <div class="bubble">VV</div>
+        <div>
+            <h1>Vowel Voyage — The Magical Sound Forest</h1>
+            <div class="intro">Click an island to meet its vowel guardian and play magical sound games.</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="status">
+            <div style="font-size:13px;color:var(--muted)">Runes</div>
+            <div class="progress"><i id="progressFill"></i></div>
+            <div id="countText" style="font-weight:700; width: 66px; text-align:right;">0 / 5</div>
+        </div>
+        <button class="btn small" id="homeBtn">Home</button>
+        <button class="btn small" id="resourcesBtn">Resources</button>
+        <button class="btn small" id="creditsBtn">Credits</button>
+    </div>
+</header>
+
+<!-- NAVIGATION -->
+<nav>
+    <button class="btn" id="mapViewBtn">Map</button>
+    <button class="btn" id="worldViewBtn" disabled>World</button>
+    <button class="btn" id="gamesViewBtn">Games</button>
+    <button class="btn" id="quizViewBtn">Quiz</button>
+</nav>
+
+<main>
+
+<!-- ============================
+        MAP VIEW
+============================= -->
+<section id="mapView" class="map">
+    <div class="row">
+        
+        <!-- MAP PANEL LEFT -->
+        <div class="panel" style="flex:1;">
+            <div style="display:flex; justify-content:space-between;">
+                <div>
+                    <strong>Explore Phonaria</strong>
+                    <div class="hint">Tap an island to enter a vowel’s world</div>
+                </div>
+                <div style="font-size:14px; color:var(--muted)">Age: 4–8 yrs</div>
+            </div>
+
+            <div class="map-canvas" id="mapCanvas">
+                <div class="island" data-vowel="a">a</div>
+                <div class="island" data-vowel="e">e</div>
+                <div class="island" data-vowel="i">i</div>
+                <div class="island" data-vowel="o">o</div>
+                <div class="island" data-vowel="u">u</div>
+            </div>
+        </div>
+
+        <!-- CHARACTER + QUICK ACTION PANEL -->
+        <div class="panel" style="max-width:360px;">
+            <div style="display:flex; gap:12px;">
+                <div class="char-card">
+                    <svg class="char" viewBox="0 0 48 48">
+                        <defs>
+                            <linearGradient id="g" x1="0" x2="1">
+                                <stop offset="0" stop-color="#ffd447"/>
+                                <stop offset="1" stop-color="#ffb86b"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="6" y="8" width="36" height="32" rx="8" ry="8" fill="url(#g)"/>
+                    </svg>
+                    <div style="font-size:13px;color:#1a2433">Guardian</div>
+                </div>
+
+                <div style="flex:1;">
+                    <div class="big" id="guardianName">Welcome</div>
+                    <div id="guardianDesc" class="hint">Choose an island to meet its vowel spirit.</div>
+
+                    <div style="margin-top:8px; display:flex; gap:8px;">
+                        <button class="btn small" id="playSoundBtn" disabled>🔊 Say</button>
+                        <button class="btn small" id="collectRuneBtn" disabled>Collect Rune</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK ACTION BUTTONS -->
+            <div style="margin-top:12px;">
+                <div style="font-size:13px; color:var(--muted);">Quick actions</div>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button class="btn" id="puzzleBtn">Go to Puzzle</button>
+                    <button class="btn" id="listenBtn">Sound Match</button>
+                    <button class="btn" id="fishBtn">Fish Game</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================
+        WORLD VIEW
+============================= -->
+<section id="worldView" style="display:none; margin-top:12px;">
+    <div class="panel world-area" style="display:flex; gap:18px; flex-wrap:wrap;">
+
+        <!-- LEFT SIDE WORLD CONTENT -->
+        <div style="flex:1;">
+            <div style="display:flex; gap:12px; align-items:center;">
+                <div>
+                    <div id="worldTitle" style="font-size:20px; font-weight:800;">a — Amber Hills</div>
+                    <div id="worldDesc" class="hint">Meet Aila the Adventurer and her Apple Phoenix.</div>
+                    <div style="margin-top:8px;">
+                        <button class="btn small" id="playWorldSound">Play Sound</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXAMPLES + PLAY AREA -->
+            <div class="game-area" id="worldContent" style="margin-top:12px;">
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    
+                    <!-- EXAMPLES PANEL -->
+                    <div class="panel" style="min-width:220px;">
+                        <div style="font-weight:700;">Examples</div>
+                        <div id="examplesList" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;"></div>
+                    </div>
+
+                    <!-- PLAY WITH GUARDIAN PANEL -->
+                    <div class="panel" style="min-width:320px;">
+                        <div style="font-weight:700;">Play with Guardian</div>
+                        <div id="worldAnimHint" style="margin-top:8px;">Tap items to hear words.</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: RUNE LIST -->
+        <div style="width:300px;">
+            <div style="font-weight:700;">Rune Status</div>
+            <div id="runeList" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <div style="margin-top:14px;">
+                <button class="btn" id="resetRunes">Reset Progress</button>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!-- ============================
+        GAMES VIEW 
+============================= -->
+<section id="gamesView" style="display:none; margin-top:12px;">
+    
+    <div class="row">
+        
+        <!-- ============================
+             DRAG & DROP SPELLING GAME
+        ============================= -->
+        <div class="panel" style="flex:1;">
+            <h3 style="margin:0;">Drag & Drop Spelling</h3>
+            <div class="hint" style="margin-top:6px;">
+                Drag the correct vowel stone into the blank to complete the word.
+            </div>
+
+            <div class="drag-area" style="margin-top:12px;">
+                <div id="wordCard" style="font-weight:800; font-size:20px;">_ pple</div>
+
+                <div class="vowels-row" id="vowelStones" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;"></div>
+
+                <div class="dropzone" id="spellingDrop">Drop vowel here</div>
+
+                <div id="spellingFeedback" class="hint"></div>
+            </div>
+        </div>
+
+
+        <!-- ============================
+             SOUND MATCHING GAME
+        ============================= -->
+        <div class="panel" style="min-width:320px;">
+            <h3 style="margin:0;">Sound Matching</h3>
+            <div class="hint" style="margin-top:6px;">
+                Listen and choose the glowing stone that matches the sound.
+            </div>
+
+            <div style="margin-top:12px;">
+                <button class="btn" id="playChallengeSound">Play Sound</button>
+
+                <div id="soundStones" class="vowels-row" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;"></div>
+
+                <div id="soundFeedback" class="hint" style="margin-top:8px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================
+           SECOND ROW OF GAMES
+    ============================= -->
+    <div class="row" style="margin-top:12px;">
+        
+        <!-- ============================
+              FISH-CATCH VOWEL GAME
+        ============================= -->
+        <div class="panel">
+            <h3 style="margin:0;">Fish-catch Vowel Game</h3>
+            <div class="hint" style="margin-top:6px;">
+                Catch the fish and pick which vowel completes its word.
+            </div>
+
+            <div class="pond" id="pond"></div>
+
+            <div id="fishFeedback" class="hint" style="margin-top:8px;"></div>
+        </div>
+
+
+        <!-- ============================
+              ACTIONS + BADGE PANEL
+        ============================= -->
+        <div class="panel quiz-card">
+            <h3 style="margin:0;">Progress / Actions</h3>
+
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="btn" id="autoCollect">Auto-collect current</button>
+                <button class="btn" id="badgeBtn">Download Badge</button>
+            </div>
+
+            <div id="gameHints" class="hint" style="margin-top:8px;">
+                Hint: Use the Play Sound buttons to practice vowel pronunciation.
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+
+<!-- ============================
+        QUIZ VIEW
+============================= -->
+<section id="quizView" style="display:none; margin-top:12px;">
+    <div class="panel">
+        <h3>Magic Gate Quiz</h3>
+        <div class="hint">Answer 5 short questions. Each correct answer earns you a magical rune!</div>
+        
+        <div id="quizArea" style="margin-top:12px;"></div>
+    </div>
+</section>
+
+
+<!-- ============================
+        RESOURCES VIEW
+============================= -->
+<section id="resourcesView" style="display:none; margin-top:12px;">
+    <div class="panel">
+        <h3>Resources & Teacher Notes</h3>
+        <ul>
+            <li>Printable vowel chart — <em>Downloadable PDF</em></li>
+            <li>Worksheet: Fill-the-blank & matching</li>
+            <li>Optional digital quiz via Google Forms</li>
+            <li>Includes browser speech synthesis audio</li>
+        </ul>
+    </div>
+</section>
+
+
+<!-- ============================
+        CREDITS VIEW
+============================= -->
+<section id="creditsView" style="display:none; margin-top:12px;">
+    <div class="panel">
+        <h3>Credits</h3>
+        <p class="hint">Replace with actual names and student IDs before submission.</p>
+    </div>
+</section>
+
+</main>
+
+<!-- CONFETTI + SOUND -->
+<div id="confetti" class="confetti"></div>
+<audio id="applauseSound" src="sound_applause.wav" preload="auto"></audio>
+<script>
+/* ============================================
+    UTILITY FUNCTIONS
+============================================ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+function speak(text, lang='en-US') {
+    if (!window.speechSynthesis) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+}
+
+function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+}
+
+/* ============================================
+    VOCAL DATA (WORLDS + EXAMPLES)
+============================================ */
+const VOCALS = {
+    A: {
+        name: "Aila (a)",
+        land: "Amber Hills",
+        desc: "A — Aila the Adventurer. Apple Phoenix.",
+        word: "apple",
+        examples: ["apple", "ant", "arrow"]
+    },
+    E: {
+        name: "Eko (e)",
+        land: "Emerald Woods",
+        desc: "E — Eko the Energetic. Elephant Cub.",
+        word: "elephant",
+        examples: ["elephant", "egg", "echo"]
+    },
+    I: {
+        name: "Ivi (i)",
+        land: "Ice Peaks",
+        desc: "I — Ivi the Ice Fairy. Igloo Sprite.",
+        word: "igloo",
+        examples: ["igloo", "ice", "ink"]
+    },
+    O: {
+        name: "Oro (o)",
+        land: "Obsidian Ocean",
+        desc: "O — Oro the Oak Giant. Orange Octopus.",
+        word: "orange",
+        examples: ["orange", "owl", "ocean"]
+    },
+    U: {
+        name: "Uma (u)",
+        land: "Unity Valley",
+        desc: "U — Uma the Underwater Unicorn. Umbrella Bird.",
+        word: "umbrella",
+        examples: ["umbrella", "unicorn", "up"]
+    }
+};
+
+let currentVowel = null;
+let collectedRunes = new Set();
+
+/* ============================================
+    UI UPDATES
+============================================ */
+function updateProgressUI() {
+    const count = collectedRunes.size;
+    $("#countText").innerText = `${count} / 5`;
+    $("#progressFill").style.width = `${count * 20}%`;
+}
+
+function updateRuneList() {
+    const box = $("#runeList");
+    box.innerHTML = "";
+    Object.keys(VOCALS).forEach(v => {
+        const div = document.createElement("div");
+        div.innerText = v;
+        div.style.padding = "6px 10px";
+        div.style.borderRadius = "10px";
+        div.style.fontWeight = "700";
+        div.style.border = "1px solid rgba(16,24,40,0.06)";
+        div.style.background =
+            collectedRunes.has(v)
+                ? "linear-gradient(90deg,#ffd447,#ffb86b)"
+                : "#fff";
+        box.appendChild(div);
+    });
+}
+
+/* ============================================
+    CELEBRATION EVENT
+============================================ */
+function fireConfetti() {
+    const container = $("#confetti");
+
+    for (let i = 0; i < 100; i++) {
+        const p = document.createElement("div");
+        p.style.position = "absolute";
+        p.style.width = p.style.height = `${6 + Math.random() * 8}px`;
+        p.style.left = `${Math.random() * 100}vw`;
+        p.style.top = "-10vh";
+        p.style.background = ["#ffd447", "#ff6b6b", "#4ecdc4", "#b6e3ff"][Math.floor(Math.random() * 4)];
+        p.style.borderRadius = "3px";
+        p.style.opacity = "0.9";
+        p.style.transform = `rotate(${Math.random() * 360}deg)`;
+        p.style.transition = "top 2.6s linear, opacity 2.6s";
+
+        container.appendChild(p);
+        setTimeout(() => {
+            p.style.top = "90vh";
+            p.style.opacity = "0.5";
+        }, 10);
+        setTimeout(() => p.remove(), 3000);
+    }
+}
+
+function celebrateIfComplete() {
+    if (collectedRunes.size === 5) {
+        $("#applauseSound").play();
+        fireConfetti();
+        setTimeout(() => alert("🎉 You collected all runes! Magic restored!"), 100);
+    }
+}
+
+/* ============================================
+    RUNE COLLECTION
+============================================ */
+function collectRune(v) {
+    if (!v) return;
+    if (collectedRunes.has(v)) return;
+
+    collectedRunes.add(v);
+    updateProgressUI();
+    updateRuneList();
+
+    $("#collectRuneBtn").disabled = true;
+
+    celebrateIfComplete();
+}
+
+/* ============================================
+    WORLD LOADING
+============================================ */
+function loadWorld(v) {
+    currentVowel = v;
+    const d = VOCALS[v];
+
+    $("#guardianName").innerText = d.name;
+    $("#guardianDesc").innerText = d.desc;
+
+    $("#worldTitle").innerText = `${v} — ${d.land}`;
+    $("#worldDesc").innerText = d.desc;
+    $("#playSoundBtn").disabled = false;
+
+    $("#collectRuneBtn").disabled = collectedRunes.has(v) ? true : false;
+
+    // Populate examples
+    const list = $("#examplesList");
+    list.innerHTML = "";
+    d.examples.forEach(word => {
+        const item = document.createElement("div");
+        item.className = "choice";
+        item.innerText = word;
+        item.onclick = () => speak(word);
+        list.appendChild(item);
+    });
+
+    $("#worldAnimHint").innerText = `Tap the words to hear them. Example: ${d.word}`;
+
+    speak(d.word);
+}
+
+
+function showView(id) {
+    const views = ["mapView", "worldView", "gamesView", "quizView", "resourcesView", "creditsView"];
+    views.forEach(v => $( "#" + v ).style.display = v === id ? "" : "none");
+
+    // update nav
+    $$("#mapViewBtn, #worldViewBtn, #gamesViewBtn, #quizViewBtn").forEach(btn => btn.disabled = false);
+    if (id === "mapView") $("#mapViewBtn").disabled = true;
+    if (id === "worldView") $("#worldViewBtn").disabled = true;
+    if (id === "gamesView") $("#gamesViewBtn").disabled = true;
+    if (id === "quizView") $("#quizViewBtn").disabled = true;
+}
+
+
+const SPELLS = [
+    { template: "_ pple", answer: "a" },
+    { template: "_ lephant", answer: "e" },
+    { template: "_ gloo", answer: "i" },
+    { template: "_ range", answer: "o" },
+    { template: "_ mbrella", answer: "u" }
+];
+
+let currentSpell = 0;
+
+function setupSpelling() {
+    const stoneRow = $("#vowelStones");
+    stoneRow.innerHTML = "";
+
+    ["a","e","i","o","u"].forEach(v => {
+        const stone = document.createElement("div");
+        stone.className = "stone";
+        stone.innerText = v;
+        stone.draggable = true;
+
+        stone.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("text", v);
+        });
+
+        stoneRow.appendChild(stone);
+    });
+
+    $("#wordCard").innerText = SPELLS[currentSpell].template;
+
+    const drop = $("#spellingDrop");
+    drop.ondragover = e => e.preventDefault();
+    drop.ondrop = e => {
+        e.preventDefault();
+        checkSpelling(e.dataTransfer.getData("text"));
+    };
+
+    $("#spellingFeedback").innerText = "";
+}
+
+function checkSpelling(letter) {
+    const user = letter.toUpperCase();
+    const correct = SPELLS[currentSpell].answer;
+
+    if (user === correct) {
+        $("#spellingFeedback").innerText = `✅ Correct! Rune unlocked: ${correct}`;
+        collectRune(correct);
+
+        currentSpell = (currentSpell + 1) % SPELLS.length;
+        $("#wordCard").innerText = SPELLS[currentSpell].template;
+    } else {
+        $("#spellingFeedback").innerText = "❌ Not correct. Try again!";
+    }
+}
+
+
+let soundTarget = null;
+
+function setupSoundMatch() {
+    const container = $("#soundStones");
+    container.innerHTML = "";
+
+    const stones = shuffle(["a","e","i","o","u"]);
+    stones.forEach(v => {
+        const s = document.createElement("div");
+        s.className = "stone";
+        s.innerText = v;
+
+        s.onclick = () => checkSound(v);
+        container.appendChild(s);
+    });
+
+    soundTarget = stones[Math.floor(Math.random() * stones.length)];
+    $("#soundFeedback").innerText = "Tap Play Sound, then select the correct vowel.";
+}
+
+$("#playChallengeSound").onclick = () => {
+    if (!soundTarget) return;
+    speak(soundTarget);
+};
+
+function checkSound(v) {
+    if (v === soundTarget) {
+        $("#soundFeedback").innerText = `✅ Correct! You heard ${v}`;
+        collectRune(v);
+
+        soundTarget = ["a","e","i","o","u"][Math.floor(Math.random()*5)];
+    } else {
+        $("#soundFeedback").innerText = "❌ Try again!";
+    }
+}
+
+
+function setupFishPond() {
+    const pond = $("#pond");
+    pond.innerHTML = "";
+
+    const fishes = [
+        { word: "_ pple", vowel: "a" },
+        { word: "_ mbrella", vowel: "u" },
+        { word: "_ range", vowel: "o" },
+        { word: "_ gloo", vowel: "i" },
+        { word: "_ lephant", vowel: "e" }
+    ];
+
+    fishes.forEach(f => {
+        const div = document.createElement("div");
+        div.className = "fish";
+        div.innerHTML = `<div style="text-align:center;"><div style="font-weight:800;">${f.word}</div><div style="font-size:12px; color:var(--muted);">tap</div></div>`;
+        
+        div.onclick = () => {
+            const ans = prompt(`Which vowel completes '${f.word}'? (a,e,i,o,u)`);
+            if (!ans) return;
+
+            const up = ans.toUpperCase();
+            if (up === f.vowel) {
+                $("#fishFeedback").innerText = `✅ Correct! Rune earned: ${up}`;
+                collectRune(up);
+            } else {
+                $("#fishFeedback").innerText = `❌ Incorrect. '${f.word}' uses ${f.vowel}.`;
+            }
+        };
+
+        pond.appendChild(div);
+    });
+}
+
+/* ============================================
+    QUIZ SYSTEM
+============================================ */
+const QUIZ = [
+    { q: "Which vowel begins the word 'Ivory'?", a: "i" },
+    { q: "Which vowel begins the word 'umbrella'?", a: "u" },
+    { q: "Which vowel begins the word 'apple'?", a: "a" },
+    { q: "Which vowel begins the word 'elephant'?", a: "e" },
+    { q: "Which vowel begins the word 'orange'?", a: "o" }
+];
+
+function loadQuiz() {
+    const area = $("#quizArea");
+    area.innerHTML = "";
+
+    QUIZ.forEach((item, i) => {
+        const card = document.createElement("div");
+        card.style.marginTop = "12px";
+
+        card.innerHTML = `<div style="font-weight:700;">${i+1}. ${item.q}</div>`;
+
+        const row = document.createElement("div");
+        row.className = "choices";
+
+        let locked = false;
+
+        ["a","e","i","o","u"].forEach(v => {
+            const c = document.createElement("div");
+            c.className = "choice";
+            c.innerText = v;
+
+            c.onclick = () => {
+                if (locked) return;
+                locked = true;
+
+                if (v === item.a) {
+                    c.style.background = "#e6ffe8";
+                    alert("Correct!");
+                    collectRune(v);
+                } else {
+                    c.style.background = "#ffecec";
+                    alert("Try again!");
+                }
+            };
+
+            row.appendChild(c);
+        });
+
+        card.appendChild(row);
+        area.appendChild(card);
+    });
+
+    const finish = document.createElement("div");
+    finish.style.marginTop = "14px";
+    finish.innerHTML = `<button class="btn">Finish Quiz</button>`;
+    finish.querySelector("button").onclick = () => alert("Quiz finished!");
+    area.appendChild(finish);
+}
+
+/* ============================================
+    BADGE GENERATION
+============================================ */
+$("#badgeBtn").onclick = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle = "#ffd447";
+    ctx.fillRect(0,0,canvas.width,80);
+
+    ctx.fillStyle = "#16324f";
+    ctx.font = "28px serif";
+    ctx.fillText("Forest Hero Badge", 24, 54);
+
+    ctx.font = "22px serif";
+    ctx.fillText("Awarded for restoring Phonaria", 24, 110);
+
+    ctx.font = "bold 60px serif";
+    ctx.fillText(`${collectedRunes.size}/5 Runes`, 24, 220);
+
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "forest-hero-badge.png";
+    link.click();
+};
+
+/* ============================================
+    BUTTON ACTIONS
+============================================ */
+$("#mapViewBtn").onclick = () => showView("mapView");
+$("#gamesViewBtn").onclick = () => showView("gamesView");
+$("#quizViewBtn").onclick = () => showView("quizView");
+$("#resourcesBtn").onclick = () => showView("resourcesView");
+$("#creditsBtn").onclick = () => showView("creditsView");
+$("#homeBtn").onclick = () => showView("mapView");
+
+$("#puzzleBtn").onclick = () => showView("gamesView");
+$("#listenBtn").onclick = () => { showView("gamesView"); setTimeout(() => $("#playChallengeSound").click(), 150); };
+$("#fishBtn").onclick = () => { showView("gamesView"); $("#pond").scrollIntoView({ behavior: "smooth" }); };
+
+$("#autoCollect").onclick = () => {
+    if (!currentVowel) return alert("Open a vowel world first.");
+    collectRune(currentVowel);
+};
+
+$("#playSoundBtn").onclick = () => currentVowel && speak(currentVowel);
+$("#playWorldSound").onclick = () => currentVowel && speak(currentVowel);
+
+$("#collectRuneBtn").onclick = () => collectRune(currentVowel);
+
+$("#resetRunes").onclick = () => {
+    if (!confirm("Reset rune progress?")) return;
+    collectedRunes = new Set();
+    updateProgressUI();
+    updateRuneList();
+};
+
+
+$$(".island").forEach(el => {
+    el.onclick = () => {
+        const id = el.dataset.vowel;
+        loadWorld(id);
+        showView("worldView");
+    };
+});
+
+
+function boot() {
+    updateRuneList();
+    updateProgressUI();
+
+    setupSpelling();
+    setupSoundMatch();
+    setupFishPond();
+    loadQuiz();
+
+    showView("mapView");
+}
+
+boot();
+</script>
+
+</body>
+</html>
