@@ -133,6 +133,7 @@ nav {
     background: white;
     position: relative;
     overflow: hidden;
+    pointer-events: auto;
 }
 
 .island {
@@ -148,6 +149,9 @@ nav {
     transition: transform .18s, box-shadow .18s;
     color: #16324f;
     font-size: 28px;
+    z-index: 10;
+    pointer-events: auto;
+    user-select: none;
 }
 
 .island:hover {
@@ -155,12 +159,16 @@ nav {
     box-shadow: 0 18px 30px rgba(14,30,37,0.12);
 }
 
+.island:active {
+    transform: translateY(-4px) scale(0.95);
+}
+
 /* Fixed map positioning */
-.island[data-vowel="a"] { left: 8%;  top: 36%; background: var(--vowela); }
-.island[data-vowel="e"] { left: 28%; top: 12%; background: var(--vowele); }
-.island[data-vowel="i"] { left: 52%; top: 44%; background: var(--voweli); }
-.island[data-vowel="o"] { left: 74%; top: 20%; background: var(--vowelo); }
-.island[data-vowel="u"] { left: 84%; top: 56%; background: var(--vowelu); }
+.island[data-vowel="a"] { left: 8%;  top: 36%; background: var(--vowelA); }
+.island[data-vowel="e"] { left: 28%; top: 12%; background: var(--vowelE); }
+.island[data-vowel="i"] { left: 52%; top: 44%; background: var(--vowelI); }
+.island[data-vowel="o"] { left: 74%; top: 20%; background: var(--vowelO); }
+.island[data-vowel="u"] { left: 84%; top: 56%; background: var(--vowelU); }
 
 
 .char-card {
@@ -387,7 +395,6 @@ nav {
                 <div style="font-size:13px; color:var(--muted);">Quick actions</div>
                 <div style="display:flex; gap:8px; margin-top:8px;">
                     <button class="btn" id="puzzleBtn">Go to Puzzle</button>
-                    <button class="btn" id="listenBtn">Sound Match</button>
                     <button class="btn" id="fishBtn">Fish Game</button>
                 </div>
             </div>
@@ -451,6 +458,7 @@ nav {
 ============================= -->
 <section id="gamesView" style="display:none; margin-top:12px;">
     
+    <!-- FIRST ROW: Two games side by side -->
     <div class="row">
         
         <!-- ============================
@@ -475,35 +483,10 @@ nav {
 
 
         <!-- ============================
-             SOUND MATCHING GAME
-        ============================= -->
-        <div class="panel" style="min-width:320px;">
-            <h3 style="margin:0;">Sound Matching</h3>
-            <div class="hint" style="margin-top:6px;">
-                Listen and choose the glowing stone that matches the sound.
-            </div>
-
-            <div style="margin-top:12px;">
-                <button class="btn" id="playChallengeSound">Play Sound</button>
-
-                <div id="soundStones" class="vowels-row" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;"></div>
-
-                <div id="soundFeedback" class="hint" style="margin-top:8px;"></div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ============================
-           SECOND ROW OF GAMES
-    ============================= -->
-    <div class="row" style="margin-top:12px;">
-        
-        <!-- ============================
               FISH-CATCH VOWEL GAME
         ============================= -->
-        <div class="panel">
-            <h3 style="margin:0;">Fish-catch Vowel Game</h3>
+        <div class="panel" style="flex:1;">
+            <h3 style="margin:0;">Vowel Game</h3>
             <div class="hint" style="margin-top:6px;">
                 Catch the fish and pick which vowel completes its word.
             </div>
@@ -512,12 +495,16 @@ nav {
 
             <div id="fishFeedback" class="hint" style="margin-top:8px;"></div>
         </div>
+    </div>
 
 
+    <!-- SECOND ROW: Progress/Actions panel centered -->
+    <div class="row" style="margin-top:12px; justify-content:center;">
+        
         <!-- ============================
               ACTIONS + BADGE PANEL
         ============================= -->
-        <div class="panel quiz-card">
+        <div class="panel quiz-card" style="max-width:500px;">
             <h3 style="margin:0;">Progress / Actions</h3>
 
             <div style="display:flex; gap:8px; margin-top:8px;">
@@ -589,6 +576,7 @@ function speak(text, lang='en-US') {
     if (!window.speechSynthesis) return;
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
+    u.rate = 0.9; // Slightly slower for clarity, especially for single letters
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
 }
@@ -748,7 +736,8 @@ function loadWorld(v) {
 
     $("#worldAnimHint").innerText = `Tap the words to hear them. Example: ${d.word}`;
 
-    speak(d.word);
+    // Don't auto-speak the word here - let the user click to hear it
+    // speak(d.word);
 }
 
 
@@ -820,43 +809,6 @@ function checkSpelling(letter) {
 }
 
 
-let soundTarget = null;
-
-function setupSoundMatch() {
-    const container = $("#soundStones");
-    container.innerHTML = "";
-
-    const stones = shuffle(["a","e","i","o","u"]);
-    stones.forEach(v => {
-        const s = document.createElement("div");
-        s.className = "stone";
-        s.innerText = v;
-
-        s.onclick = () => checkSound(v);
-        container.appendChild(s);
-    });
-
-    soundTarget = stones[Math.floor(Math.random() * stones.length)];
-    $("#soundFeedback").innerText = "Tap Play Sound, then select the correct vowel.";
-}
-
-$("#playChallengeSound").onclick = () => {
-    if (!soundTarget) return;
-    speak(soundTarget);
-};
-
-function checkSound(v) {
-    if (v === soundTarget) {
-        $("#soundFeedback").innerText = `✅ Correct! You heard ${v}`;
-        collectRune(v);
-
-        soundTarget = ["a","e","i","o","u"][Math.floor(Math.random()*5)];
-    } else {
-        $("#soundFeedback").innerText = "❌ Try again!";
-    }
-}
-
-
 function setupFishPond() {
     const pond = $("#pond");
     pond.innerHTML = "";
@@ -906,14 +858,30 @@ function loadQuiz() {
     const area = $("#quizArea");
     area.innerHTML = "";
 
+    // Create container for quiz cards with 3-column layout
+    const cardsContainer = document.createElement("div");
+    cardsContainer.style.display = "flex";
+    cardsContainer.style.flexWrap = "wrap";
+    cardsContainer.style.gap = "18px";
+    cardsContainer.style.marginBottom = "14px";
+
     QUIZ.forEach((item, i) => {
         const card = document.createElement("div");
-        card.style.marginTop = "12px";
+        card.style.flex = "1 1 calc(33.333% - 12px)";
+        card.style.minWidth = "200px";
+        card.style.padding = "12px";
+        card.style.borderRadius = "10px";
+        card.style.border = "2px solid rgba(16,24,40,0.06)";
+        card.style.background = "white";
+        card.style.boxShadow = "0 4px 12px rgba(16,24,40,0.04)";
 
-        card.innerHTML = `<div style="font-weight:700;">${i+1}. ${item.q}</div>`;
+        card.innerHTML = `<div style="font-weight:700; margin-bottom:10px;">${i+1}. ${item.q}</div>`;
 
         const row = document.createElement("div");
         row.className = "choices";
+        row.style.display = "flex";
+        row.style.gap = "8px";
+        row.style.flexWrap = "wrap";
 
         let locked = false;
 
@@ -940,8 +908,10 @@ function loadQuiz() {
         });
 
         card.appendChild(row);
-        area.appendChild(card);
+        cardsContainer.appendChild(card);
     });
+
+    area.appendChild(cardsContainer);
 
     const finish = document.createElement("div");
     finish.style.marginTop = "14px";
@@ -992,7 +962,6 @@ $("#creditsBtn").onclick = () => showView("creditsView");
 $("#homeBtn").onclick = () => showView("mapView");
 
 $("#puzzleBtn").onclick = () => showView("gamesView");
-$("#listenBtn").onclick = () => { showView("gamesView"); setTimeout(() => $("#playChallengeSound").click(), 150); };
 $("#fishBtn").onclick = () => { showView("gamesView"); $("#pond").scrollIntoView({ behavior: "smooth" }); };
 
 $("#autoCollect").onclick = () => {
@@ -1013,12 +982,22 @@ $("#resetRunes").onclick = () => {
 };
 
 
-$$(".island").forEach(el => {
-    el.onclick = () => {
-        const id = el.dataset.vowel;
-        loadWorld(id);
-        showView("worldView");
-    };
+// Use event delegation on map-canvas to ensure clicks are captured
+$("#mapCanvas").addEventListener("click", (e) => {
+    const island = e.target.closest(".island");
+    if (island) {
+        const id = island.dataset.vowel;
+        if (id) {
+            const vowelUpper = id.toUpperCase();
+            // Play the vowel sound when clicked
+            speak(vowelUpper);
+            // Small delay to let the vowel sound start playing before loading the world
+            setTimeout(() => {
+                loadWorld(vowelUpper);
+                showView("worldView");
+            }, 300);
+        }
+    }
 });
 
 
@@ -1027,7 +1006,6 @@ function boot() {
     updateProgressUI();
 
     setupSpelling();
-    setupSoundMatch();
     setupFishPond();
     loadQuiz();
 
