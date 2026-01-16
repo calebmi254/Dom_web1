@@ -794,12 +794,12 @@ function setupSpelling() {
 }
 
 function checkSpelling(letter) {
-    const user = letter.toUpperCase();
+    const user = letter.toLowerCase();
     const correct = SPELLS[currentSpell].answer;
 
     if (user === correct) {
-        $("#spellingFeedback").innerText = `✅ Correct! Points unlocked: ${correct}`;
-        collectRune(correct);
+        $("#spellingFeedback").innerText = `✅ Correct! Points unlocked: ${correct.toUpperCase()}`;
+        collectRune(correct.toUpperCase());
 
         currentSpell = (currentSpell + 1) % SPELLS.length;
         $("#wordCard").innerText = SPELLS[currentSpell].template;
@@ -830,10 +830,10 @@ function setupFishPond() {
             const ans = prompt(`Which vowel completes '${f.word}'? (a,e,i,o,u)`);
             if (!ans) return;
 
-            const up = ans.toUpperCase();
-            if (up === f.vowel) {
-                $("#fishFeedback").innerText = `✅ Correct! Points earned: ${up}`;
-                collectRune(up);
+            const userLower = ans.toLowerCase();
+            if (userLower === f.vowel) {
+                $("#fishFeedback").innerText = `✅ Correct! Points earned: ${f.vowel.toUpperCase()}`;
+                collectRune(f.vowel.toUpperCase());
             } else {
                 $("#fishFeedback").innerText = `❌ Incorrect. '${f.word}' uses ${f.vowel}.`;
             }
