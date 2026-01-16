@@ -318,7 +318,7 @@ nav {
 
     <div class="controls">
         <div class="status">
-            <div style="font-size:13px;color:var(--muted)">Runes</div>
+            <div style="font-size:13px;color:var(--muted)">Points</div>
             <div class="progress"><i id="progressFill"></i></div>
             <div id="countText" style="font-weight:700; width: 66px; text-align:right;">0 / 5</div>
         </div>
@@ -385,7 +385,7 @@ nav {
 
                     <div style="margin-top:8px; display:flex; gap:8px;">
                         <button class="btn small" id="playSoundBtn" disabled>🔊 Say</button>
-                        <button class="btn small" id="collectRuneBtn" disabled>Collect Rune</button>
+                        <button class="btn small" id="collectRuneBtn" disabled>Collect Points</button>
                     </div>
                 </div>
             </div>
@@ -444,7 +444,7 @@ nav {
 
         <!-- RIGHT SIDE: RUNE LIST -->
         <div style="width:300px;">
-            <div style="font-weight:700;">Rune Status</div>
+            <div style="font-weight:700;">Points Status</div>
             <div id="runeList" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;"></div>
             <div style="margin-top:14px;">
                 <button class="btn" id="resetRunes">Reset Progress</button>
@@ -527,7 +527,7 @@ nav {
 <section id="quizView" style="display:none; margin-top:12px;">
     <div class="panel">
         <h3>Magic Gate Quiz</h3>
-        <div class="hint">Answer 5 short questions. Each correct answer earns you a magical rune!</div>
+        <div class="hint">Answer 5 short questions. Each correct answer earns you a magical Points!</div>
         
         <div id="quizArea" style="margin-top:12px;"></div>
     </div>
@@ -687,7 +687,7 @@ function celebrateIfComplete() {
     if (collectedRunes.size === 5) {
         $("#applauseSound").play();
         fireConfetti();
-        setTimeout(() => alert("🎉 You collected all runes! Magic restored!"), 100);
+        setTimeout(() => alert("🎉 You collected all Points! Magic restored!"), 100);
     }
 }
 
@@ -798,7 +798,7 @@ function checkSpelling(letter) {
     const correct = SPELLS[currentSpell].answer;
 
     if (user === correct) {
-        $("#spellingFeedback").innerText = `✅ Correct! Rune unlocked: ${correct}`;
+        $("#spellingFeedback").innerText = `✅ Correct! Points unlocked: ${correct}`;
         collectRune(correct);
 
         currentSpell = (currentSpell + 1) % SPELLS.length;
@@ -832,7 +832,7 @@ function setupFishPond() {
 
             const up = ans.toUpperCase();
             if (up === f.vowel) {
-                $("#fishFeedback").innerText = `✅ Correct! Rune earned: ${up}`;
+                $("#fishFeedback").innerText = `✅ Correct! Points earned: ${up}`;
                 collectRune(up);
             } else {
                 $("#fishFeedback").innerText = `❌ Incorrect. '${f.word}' uses ${f.vowel}.`;
